@@ -39,6 +39,8 @@ GOOGLE_API_KEY=              # Google TTS + Google Imagen
 ELEVENLABS_API_KEY=          # TTS, music, sound effects (10K chars/month free)
 OPENAI_API_KEY=              # OpenAI TTS + DALL-E 3 images
 XAI_API_KEY=                 # xAI Grok image generation/editing + Grok video generation
+DOUBAO_SPEECH_API_KEY=       # Volcengine Doubao Speech TTS (strong Mandarin narration)
+DOUBAO_SPEECH_VOICE_TYPE=    # Default Doubao speaker/voice type
 
 # MULTI-MODEL GATEWAY (one key, 6+ tools)
 FAL_KEY=                     # FLUX, Recraft, Kling, Veo, MiniMax video
@@ -156,6 +158,52 @@ No subscription — pure pay-as-you-go, no minimum spend.
 | Scale | $330/mo | 2,000,000 | Priority support |
 
 **Free tier:** 10,000 characters/month (roughly 2-3 minutes of narration). API access included. Music generation and sound effects also available on free tier with limited credits.
+
+---
+
+### Doubao Speech — Mandarin TTS
+
+> **Strong Mandarin narration.** Volcengine Doubao Speech is a good choice for Chinese explainer voiceovers and long-form narration that needs subtitle timing metadata.
+
+**Tools unlocked:** `doubao_tts`
+**Env vars:** `DOUBAO_SPEECH_API_KEY`, `DOUBAO_SPEECH_VOICE_TYPE`
+
+#### Setup
+
+1. Open the Volcengine Doubao Speech console and enable Speech Synthesis 2.0.
+2. Create a new-console API Key.
+3. Choose a Speech 2.0 voice type, for example `zh_female_vv_uranus_bigtts`.
+4. Add to `.env`:
+   ```bash
+   DOUBAO_SPEECH_API_KEY=your-api-key
+   DOUBAO_SPEECH_VOICE_TYPE=zh_female_vv_uranus_bigtts
+   ```
+
+#### API Notes
+
+OpenMontage uses the new-console API key flow:
+
+```text
+X-Api-Key: ${DOUBAO_SPEECH_API_KEY}
+X-Api-Resource-Id: seed-tts-2.0
+```
+
+Do not pass a new-console API Key as `X-Api-App-Id` or `X-Api-Access-Key`. That mismatch can produce `load grant: requested grant not found`.
+
+#### What It Is Best For
+
+- Natural Mandarin narration for Chinese-language explainers
+- Async long-form narration via `/api/v3/tts/submit` and `/api/v3/tts/query`
+- Character-level timing metadata for subtitle alignment
+- Calm educational pacing where the video duration can follow the approved voice rhythm
+
+#### Pacing
+
+Start with `speech_rate: 0` for natural Mandarin delivery. If the approved format needs a tighter runtime, compare short samples at `speech_rate: 25` or `50` before generating the full narration. Do not force Doubao to match another provider's duration unless the user explicitly wants that tradeoff.
+
+#### Pricing
+
+Doubao Speech 2.0 is billed by character package or usage in Volcengine. OpenMontage estimates cost from text length and prefers provider-returned usage metadata when available.
 
 ---
 
@@ -498,6 +546,39 @@ The `video_compose` tool's `render` operation auto-detects when Remotion is need
 - Cuts specify `animation` or `transition_in`/`transition_out`
 
 If Remotion is not installed, compositions fall back to FFmpeg Ken Burns pan-and-zoom — functional but less engaging.
+
+**Cost:** Free. Always local.
+
+---
+
+### HyperFrames - HTML/CSS/GSAP Video Composition
+
+> **GSAP-native local rendering.** HyperFrames is the preferred runtime for motion-graphics-heavy HTML compositions and the `character-animation` pipeline's rigged SVG character acting.
+
+**Tool:** `hyperframes_compose` directly, or `video_compose` with `edit_decisions.render_runtime="hyperframes"`
+**Runtime:** CPU (Node.js >= 22, FFmpeg, and `npx` required)
+**Env var:** None
+
+#### Setup
+
+```bash
+node --version
+ffmpeg -version
+npx --yes hyperframes doctor
+```
+
+The CLI is consumed as `npx hyperframes`. Do not use `npx @hyperframes/cli`; that package name is not the OpenMontage runtime path.
+
+#### What HyperFrames Renders
+
+| Use case | What it produces |
+|----------|------------------|
+| **Kinetic typography** | HTML/CSS text animation driven by GSAP timelines |
+| **Product / launch videos** | Structured HTML scenes, registry blocks, and transitions |
+| **Website-to-video** | Browser-captured site compositions with HyperFrames validation |
+| **Character animation** | SVG character rigs, pose/action timelines, and GSAP acting beats rendered to `renders/final.mp4` |
+
+HyperFrames workspaces live under `projects/<project-name>/hyperframes/`. Final videos still follow the normal OpenMontage convention: `projects/<project-name>/renders/final.mp4`.
 
 **Cost:** Free. Always local.
 
