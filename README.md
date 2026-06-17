@@ -657,6 +657,9 @@ make test
 
 ## License
 
+> **Commercial use:** the code is AGPL-3.0 (commercial-OK), but some *optional* model backends are non-commercial. See [NON-COMMERCIAL-MODELS.md](NON-COMMERCIAL-MODELS.md) before commercial deployment.
+
+
 [GNU AGPLv3](LICENSE)
 
 ---
