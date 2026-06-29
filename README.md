@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="video" width="880"></p>
+
 <p align="center">
   <img src="assets/logo.png" alt="OpenMontage" width="200">
 </p>
